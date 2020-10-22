@@ -1,14 +1,18 @@
 #include <stdio.h>
-#include <string.h>
 #include <pthread.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <time.h>
 
 #define M 3
 #define K 3
 #define N 3
 
+int A[M][K],B[K][N],C[M][N];
+
+typedef struct{
+    int fila;
+    int ult_fila;
+}Datos;
 
 void *thread_function(void *arg){
     int v=*(int*)arg;
@@ -17,13 +21,31 @@ void *thread_function(void *arg){
 }
 
 int main(int argc,char *argv[]){
-    int i,j,num_threads=atoi(argv[1]);
+    int i,j;
+    int num_threads;
     pthread_t *threads;
-    int A[M][K],B[K][N],C[M][N];
+    Datos *datos;
     srand(time(NULL));
-    printf("\n\nMatriz A\n");
+
+    //VERIFICAR NÚMERO DE ARGUMENTOS
+    if(argc==2){
+        num_threads=atoi(argv[1]);
+        threads=(pthread_t*)malloc(sizeof(pthread_t)*num_threads);
+        datos=(Datos*)malloc(sizeof(Datos)*num_threads);
+    }
+    else{
+        printf("Debe ingresar el número de hillos.");
+        return 0;
+    }
+
+    //COMPROBAR SI SE CREARON CORRECTAMENTE LOS HILOS
+    if(threads==NULL){
+        printf("\nNo se pudo modificar la memoria dinámicamente.");
+        return 1;
+    }
 
     //LLENADO DE MATRIZ A
+    printf("\n\nMatriz A\n");
     for (i = 0; i < M; i++){
         for(j=0;j<K;j++){
             A[i][j]=rand()%10;
@@ -31,28 +53,14 @@ int main(int argc,char *argv[]){
         }
         printf("\n");
     }
-    printf("\n\nMatriz B\n");
     //LLENADO DE MATRIZ B
+    printf("\n\nMatriz B\n");
     for (i = 0; i < K; i++){
         for(j=0;j<N;j++){
             B[i][j]=rand()%10;
             printf("  %d",B[i][j]);
         }
         printf("\n");
-    }
-    
-
-    if(argc==2){
-        threads=(pthread_t*)malloc(sizeof(pthread_t)*num_threads);
-    }
-    else{
-        printf("\nIngresa los argumentos correctamente");
-        return 0;
-    }
-
-    if(threads==NULL){
-        printf("\nNo se pudo modificar la memoria dinámicamente.");
-        return 1;
     }
 
     for(i=0;i<num_threads;i++){

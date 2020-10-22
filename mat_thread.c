@@ -15,8 +15,9 @@ typedef struct{
 }Datos;
 
 void *thread_function(void *arg){
-    int v=*(int*)arg;
-    printf("\nThread #%d: ¡Hola, mundo!",*(int *)arg);
+    Datos *p_str = (Datos*)arg;
+    printf("\nRango: %d - %d.",p_str->fila,p_str->ult_fila);
+    //printf("\nThread #%d: ¡Hola, mundo!",*(int *)arg);
     return NULL;
 }
 
@@ -65,8 +66,10 @@ int main(int argc,char *argv[]){
 
     //CREACIÓN DE HILOS
     for(i=0;i<num_threads;i++){
-        pthread_create(&threads[i],NULL,thread_function,&i);
-        printf("\n\t\tHilo #%d creado.",i);
+        datos[i].fila=i;
+        datos[i].ult_fila=i+1;
+        pthread_create(&threads[i],NULL,thread_function,&datos[i]);
+        //printf("\n\t\tHilo #%d creado.",i);
     }
     //ESPERA TERMINACIÓN DE HILOS
     for(i=0;i<num_threads;i++){

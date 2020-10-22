@@ -63,13 +63,16 @@ int main(int argc,char *argv[]){
         printf("\n");
     }
 
+    //CREACIÓN DE HILOS
     for(i=0;i<num_threads;i++){
         pthread_create(&threads[i],NULL,thread_function,&i);
         printf("\n\t\tHilo #%d creado.",i);
     }
+    //ESPERA TERMINACIÓN DE HILOS
     for(i=0;i<num_threads;i++){
         pthread_join(threads[i],NULL);
     }
+    //LIBERA MEMORIA DINÁMICA
     free(threads);
     return 0;
 }

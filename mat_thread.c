@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define M 3
-#define K 3
-#define N 3
+#define M 1500
+#define K 1500
+#define N 1500
 
 int A[M][K],B[K][N],C[M][N];
 
@@ -16,17 +16,28 @@ typedef struct{
 
 void *thread_function(void *arg){
     Datos *p_str = (Datos*)arg;
-    printf("\nRango: %d - %d.",p_str->fila,p_str->ult_fila);
-    //printf("\nThread #%d: ¡Hola, mundo!",*(int *)arg);
+    int inicio=p_str->fila,fin=p_str->ult_fila,aux;
+    /* printf("\nRango: %d - %d.",inicio,fin);
+    printf(" Total: %d.",fin-inicio); */
+    for(int i=inicio;i<fin;i++){
+        //printf("\n");
+        for(int j=0;j<N;j++){
+            C[i][j]=0;
+            for(int k=0;k<K;k++){
+                C[i][j]+=A[i][k]*B[k][j];
+            }
+            //printf("\t%d",C[i][j]);
+        }
+    }
     return NULL;
 }
 
 int main(int argc,char *argv[]){
-    int i,j;
+    int i,j,each,aux;
     int num_threads;
     pthread_t *threads;
     Datos *datos;
-    srand(time(NULL));
+    //srand(time(NULL));
 
     //VERIFICAR NÚMERO DE ARGUMENTOS
     if(argc==2){
@@ -35,9 +46,12 @@ int main(int argc,char *argv[]){
         datos=(Datos*)malloc(sizeof(Datos)*num_threads);
     }
     else{
-        printf("Debe ingresar el número de hillos.");
+        printf("Debe ingresar el número de hilos.");
         return 0;
     }
+
+    //VERIFICA SI HAY MÁS HILOS QUE FILAS
+    if(num_threads>M) return 1;
 
     //COMPROBAR SI SE CREARON CORRECTAMENTE LOS HILOS
     if(threads==NULL){
@@ -64,17 +78,37 @@ int main(int argc,char *argv[]){
         printf("\n");
     }
 
+    //FILAS A TRABAJAR POR CADA HILO
+    aux=0;
+    each=(M/num_threads);
+    for(i=0;i<num_threads;i++){
+        datos[i].fila=aux;
+        aux+=each;
+        if(i<(M%num_threads))
+            aux++;
+        datos[i].ult_fila=aux;
+    }
+
     //CREACIÓN DE HILOS
     for(i=0;i<num_threads;i++){
-        datos[i].fila=i;
-        datos[i].ult_fila=i+1;
         pthread_create(&threads[i],NULL,thread_function,&datos[i]);
         //printf("\n\t\tHilo #%d creado.",i);
     }
+
     //ESPERA TERMINACIÓN DE HILOS
     for(i=0;i<num_threads;i++){
         pthread_join(threads[i],NULL);
     }
+
+    //IMPRIME MATRIZ RESULTANTE
+    printf("\n\nMatriz R\n");
+    for (i = 0; i < M; i++){
+        for(j=0;j<N;j++){
+            printf("\t%d",C[i][j]);
+        }
+        printf("\n");
+    }
+
     //LIBERA MEMORIA DINÁMICA
     free(threads);
     return 0;
